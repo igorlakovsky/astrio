@@ -63,7 +63,6 @@
         </el-button>
       </div>
     </el-main>
-    <pre>{{ cartProducts }}</pre>
   </el-container>
 </template>
 
