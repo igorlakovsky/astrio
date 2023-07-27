@@ -1,5 +1,5 @@
-import brandsData from '../db/brands.json'
+import brandsData from '../db/brands.json';
 
-export default defineEventHandler(() => {
-  return brandsData
-})
+export default defineEventHandler((Z) => {
+  return brandsData;
+});
