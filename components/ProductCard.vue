@@ -59,10 +59,16 @@
         </div>
       </div>
       <el-button
+        ref="buttonRef"
         class="card__button"
         plain
         color="#242424"
         :disabled="options ? !(selectedColor && selectedSize) : false"
+        @mouseup="
+          () => {
+            buttonRef.ref.blur();
+          }
+        "
         @click="
           () => {
             ElNotification({
@@ -70,6 +76,15 @@
               type: 'info',
               position: 'bottom-right',
               duration: 2000,
+            });
+            cartProducts.push({
+              id: options ? productId : id,
+              image: options ? productImage : image,
+              title: title,
+              brand: brand.title,
+              price: price,
+              color: selectedColorName?.label,
+              size: selectedSizeName?.label,
             });
           }
         "
@@ -84,6 +99,7 @@
 import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
+  id: { type: Number, required: true },
   title: { type: String, required: true },
   image: { type: String, required: true },
   brand: { type: Object, required: true },
@@ -92,17 +108,56 @@ const props = defineProps({
   variants: { type: Object, default: () => {} },
 });
 
+const cartProducts = useState('cartProducts');
+
+const buttonRef = ref();
 const screenWidth = ref();
 
-const selectedColor = ref(null);
 const selectedSize = ref(null);
+const selectedColor = ref(null);
+
+const selectedSizeName = computed(() => {
+  if (selectedSize.value) {
+    const sizeOption = props.options.find((option) => {
+      if (option.attribute_code === 'size') {
+        return true;
+      }
+    });
+    return sizeOption.values.find((value) => {
+      return value.value_index === selectedSize.value;
+    });
+  }
+  return null;
+});
+
+const selectedColorName = computed(() => {
+  if (selectedColor.value) {
+    const colorOption = props.options.find((option) => {
+      if (option.attribute_code === 'color') {
+        return true;
+      }
+    });
+    return colorOption.values.find((value) => {
+      return value.value_index === selectedColor.value;
+    });
+  }
+  return null;
+});
 
 const productImage = computed(() => {
   const variant = findVariant(selectedColor.value, selectedSize.value);
   if (variant) {
     return variant.product.image;
   }
-  return image;
+  return null;
+});
+
+const productId = computed(() => {
+  const variant = findVariant(selectedColor.value, selectedSize.value);
+  if (variant) {
+    return variant.product.id;
+  }
+  return null;
 });
 
 const colSpan = computed(() => {
@@ -113,8 +168,6 @@ const colSpan = computed(() => {
 
   return 4;
 });
-
-function selectOption() {}
 
 function findVariant(color, size) {
   return props.variants.find((variant) => {
@@ -207,6 +260,8 @@ onMounted(() => {
   &__button {
     width: 100%;
     margin-top: auto;
+    font-family: 'Dai Banna SIL', serif;
+    font-size: 16px;
   }
 }
 
